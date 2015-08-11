@@ -404,34 +404,33 @@ ngx_rtmp_relay_create_connection(ngx_rtmp_conf_ctx_t *cctx, ngx_str_t* name,
         if (first != last && *first == '/') {
             ++first;
         }
+        if (first != last && *last == '/') {
+            --last;
+        }
 
         if (first != last) {
-
-            /* deduce app */
-            p = ngx_strlchr(first, last, '/');
-            if (p == NULL) {
-                p = last;
+            p = last;
+            while (p > first) {
+                if (*p == '/') {
+                    break;
+                }
+                p--;
             }
 
-            if (rctx->app.len == 0 && first != p) {
-                v.data = first;
-                v.len = p - first;
-                if (ngx_rtmp_relay_copy_str(pool, &rctx->app, &v) != NGX_OK) {
+            /* deduce play_path */
+            if (rctx->play_path.len == 0 && p != first) {
+                v.data = p + 1;
+                v.len = last - v.data;
+                if (ngx_rtmp_relay_copy_str(pool, &rctx->play_path, &v) != NGX_OK) {
                     goto clear;
                 }
             }
 
-            /* deduce play_path */
-            if (p != last) {
-                ++p;
-            }
-
-            if (rctx->play_path.len == 0 && p != last) {
-                v.data = p;
-                v.len = last - p;
-                if (ngx_rtmp_relay_copy_str(pool, &rctx->play_path, &v)
-                        != NGX_OK)
-                {
+            /* deduce app */
+            if (rctx->app.len == 0 && p != first) {
+                v.data = first;
+                v.len = p - v.data;
+                if (ngx_rtmp_relay_copy_str(pool, &rctx->app, &v) != NGX_OK) {
                     goto clear;
                 }
             }
