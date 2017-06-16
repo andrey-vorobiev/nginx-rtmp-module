@@ -297,8 +297,7 @@ ngx_rtmp_cmd_connect(ngx_rtmp_session_t *s, ngx_rtmp_connect_t *v)
     /* find application & set app_conf */
     cacfp = cscf->applications.elts;
     for(n = 0; n < cscf->applications.nelts; ++n, ++cacfp) {
-        if ((*cacfp)->name.len == s->app.len &&
-            ngx_strncmp((*cacfp)->name.data, s->app.data, s->app.len) == 0)
+        if (ngx_strstr(s->app.data, (*cacfp)->name.data))
         {
             /* found app! */
             s->app_conf = (*cacfp)->app_conf;
